@@ -4,6 +4,7 @@ from pathlib import Path
 
 from src.autograder_ai.engine import Engine
 
+
 def parse_args():
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
@@ -14,14 +15,14 @@ def parse_args():
         "--assignment",
         required=True,
         type=Path,
-        help="Path to the assignment PDF file."
+        help="Path to the assignment PDF file.",
     )
 
     parser.add_argument(
         "--submission",
         required=True,
         type=Path,
-        help="Path to the student's code submission file or directory."
+        help="Path to the student's code submission file or directory.",
     )
 
     return parser.parse_args()
@@ -38,8 +39,6 @@ def validate_paths(assignment: Path, submission: Path):
         sys.exit(1)
 
 
-
-
 def main():
     args = parse_args()
     validate_paths(args.assignment, args.submission)
@@ -47,8 +46,5 @@ def main():
     engine.run()
 
 
-
-
 if __name__ == "__main__":
     main()
-

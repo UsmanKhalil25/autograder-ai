@@ -1,4 +1,3 @@
-
 import re
 from pathlib import Path
 from typing import Dict
@@ -23,7 +22,8 @@ class SubmissionPreProcessor(BasePreProcessor):
 
     def _validate_filenames(self):
         invalid_files = [
-            f.name for f in self.submission_path.iterdir()
+            f.name
+            for f in self.submission_path.iterdir()
             if f.is_file() and not self.FILENAME_PATTERN.match(f.name)
         ]
         if invalid_files:
@@ -38,4 +38,3 @@ class SubmissionPreProcessor(BasePreProcessor):
                 handler = CodeFileHandler(str(file))
                 submissions[file.name] = handler.read()
         return submissions
-

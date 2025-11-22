@@ -7,8 +7,6 @@ class Engine:
         self.assignment_preprocessor = AssignmentPreProcessor(assignment_path)
         self.submission_preprocessor = SubmissionPreProcessor(submission_path)
 
-
     def run(self):
         print(self.assignment_preprocessor.run())
         print(self.submission_preprocessor.run())
-
