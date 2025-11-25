@@ -1,12 +1,15 @@
 import json
 
-from ..states import TestGenerationState 
+from ..states import TestGenerationState
 from ..prompts import TEST_GENERATION_PROMPT
+from ...utils import extract_json
+
 
 def analyze_question_node(state: TestGenerationState) -> TestGenerationState:
     """Node: Analyze the assignment question"""
     print(f"  → Analyzing question: {state['question_id']}")
     return state
+
 
 def analyze_code_node(state: TestGenerationState) -> TestGenerationState:
     """Node: Analyze the submitted code"""
@@ -21,7 +24,17 @@ def generate_test_cases_node(llm):
         )
 
         response = llm.invoke(prompt)
-        state["test_cases"] = json.loads(response)
+        content = response.content
+
+        # Extract JSON from the response
+        json_str = extract_json(content)
+
+        try:
+            state["test_cases"] = json.loads(json_str)
+        except json.JSONDecodeError as e:
+            print(f"  ✗ Failed to parse JSON: {e}")
+            print(f"  Response content: {content[:200]}...")
+            state["test_cases"] = []
 
         return state
 

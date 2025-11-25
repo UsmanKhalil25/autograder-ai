@@ -1,8 +1,9 @@
 import sys
 import argparse
 from pathlib import Path
+from dotenv import load_dotenv
 
-from src.autograder_ai.engine import Engine
+from src.autograder_ai.engine import EvaluationEngine
 
 
 def parse_args():
@@ -40,10 +41,15 @@ def validate_paths(assignment: Path, submission: Path):
 
 
 def main():
+    load_dotenv()
+
     args = parse_args()
     validate_paths(args.assignment, args.submission)
-    engine = Engine(args.assignment, args.submission)
-    engine.run()
+
+    engine = EvaluationEngine(args.assignment, args.submission)
+
+    results = engine.run()
+    print(results)
 
 
 if __name__ == "__main__":
