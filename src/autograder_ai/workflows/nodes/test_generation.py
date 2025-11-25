@@ -1,6 +1,7 @@
 import json
+from typing import Any, Dict
 
-from ..states import TestGenerationState
+from ..states import TestGenerationState, TestCase
 from ..prompts import TEST_GENERATION_PROMPT
 from ...utils import extract_json
 
@@ -15,6 +16,26 @@ def analyze_code_node(state: TestGenerationState) -> TestGenerationState:
     """Node: Analyze the submitted code"""
     print(f"  → Analyzing submitted code")
     return state
+
+
+def is_valid_test_case(case: Any) -> bool:
+    """Check if a test case matches the TestCase schema"""
+    if not isinstance(case, dict):
+        return False
+
+    # Check required fields
+    if "input" not in case or "expected_output" not in case:
+        return False
+
+    # Validate input is a dict
+    if not isinstance(case["input"], dict):
+        return False
+
+    # Description is optional but must be string if present
+    if "description" in case and not isinstance(case["description"], str):
+        return False
+
+    return True
 
 def generate_test_cases_node(llm):
     def node(state):
@@ -41,43 +62,33 @@ def generate_test_cases_node(llm):
     return node
 
 def validate_tests_node(state: TestGenerationState) -> TestGenerationState:
-
+    """Validate that test cases match the TestCase schema"""
     raw_cases = state.get("test_cases", None)
 
     if not isinstance(raw_cases, list):
-        print("LLM returned a non-list -- resetting test_cases to empty list")
+        print("  ✗ LLM returned a non-list -- resetting test_cases to empty list")
         state["test_cases"] = []
         return state
 
-    validated = []
+    validated: list[TestCase] = []
 
     for index, case in enumerate(raw_cases):
-        if not isinstance(case, dict):
-            print(f"Test case {index} is not a dict. Skipping.")
-            continue
+        if is_valid_test_case(case):
+            validated.append(case)
+        else:
+            # Provide specific feedback on what's wrong
+            if not isinstance(case, dict):
+                print(f"  ✗ Test case {index} is not a dict. Skipping.")
+            elif "input" not in case:
+                print(f"  ✗ Test case {index} missing 'input' field. Skipping.")
+            elif "expected_output" not in case:
+                print(f"  ✗ Test case {index} missing 'expected_output' field. Skipping.")
+            elif not isinstance(case["input"], dict):
+                print(f"  ✗ Test case {index} 'input' is not a dict. Skipping.")
+            elif "description" in case and not isinstance(case["description"], str):
+                print(f"  ✗ Test case {index} 'description' is not a string. Skipping.")
 
-        cleaned_case = {}
-
-        for key, value in case.items():
-
-            if not isinstance(key, str):
-                print(f"Invalid key type in case {index}: {key} (ignored)")
-                continue
-
-            if isinstance(value, (str, int, float, bool)) or value is None:
-                cleaned_case[key] = value
-
-            elif isinstance(value, list):
-                if all(isinstance(x, (str, int, float, bool, type(None))) for x in value):
-                    cleaned_case[key] = value
-                else:
-                    print(f"List contains invalid types in case {index}, key '{key}'")
-            else:
-                print(f"Unsupported value type in case {index}, key '{key}': {type(value)}")
-
-        if cleaned_case:
-            validated.append(cleaned_case)
-
+    print(f"  ✓ Validated {len(validated)}/{len(raw_cases)} test cases")
     state["test_cases"] = validated
     return state
 

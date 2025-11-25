@@ -1,11 +1,8 @@
 TEST_GENERATION_PROMPT = """
 You are an expert software tester.
 
-Your goal is to generate a list of input dictionaries that simulate how real users
-would interact with the given assignment problem.
-
-These are NOT unit tests and NOT expected outputs.
-They are only **input variations** that will be fed into the student's code.
+Your goal is to generate comprehensive test cases for the given assignment.
+Each test case must include BOTH the input parameters AND the expected output.
 
 -----------------------------
 ASSIGNMENT QUESTION
@@ -21,32 +18,44 @@ REQUIREMENTS FOR THE TEST CASES
 1. Produce **ONLY** a JSON list of dictionaries.
    No explanation, no comments, no text outside JSON.
 
-2. Each dictionary represents a single run of the program
-   and contains **only the input parameters** needed by the code.
+2. Each dictionary must have this exact structure:
+   {{
+     "input": {{"param1": value, "param2": value}},
+     "expected_output": value,
+     "description": "brief description of what this test checks"
+   }}
 
-3. You must infer which parameters are required by the program
-   by analyzing the submitted code and the assignment question.
+3. The "input" field contains all parameters needed by the function.
+   The "expected_output" field contains what the function should return.
+   The "description" field briefly explains what the test case validates.
 
-4. Include **all these categories** of cases:
-   - Typical / normal inputs
-   - Boundary inputs
-   - Edge cases
-   - Invalid or unexpected inputs (but still syntactically correct)
-   - Stress / large-value cases (if relevant)
+4. Analyze the submitted code to determine the correct expected outputs.
+   Use the assignment question to understand the intended behavior.
 
-5. Generate **8–15 test cases**, depending on complexity.
+5. Include **all these categories** of cases:
+   - Typical / normal inputs with correct outputs
+   - Boundary inputs (e.g., 0, 1, -1, empty strings)
+   - Edge cases (e.g., very large numbers, special values)
+   - Invalid inputs that should be handled gracefully
 
-6. Every test case must be a **pure dictionary of primitive types** (str, int, float, bool, list).
+6. Generate **8–15 test cases**, depending on complexity.
 
-7. Do not wrap the list in any outer structure.
-   Output must be directly assignable to `test_cases: List[Dict[str, Any]]`.
+7. All values must be valid JSON types (string, number, boolean, null, array, object).
 
 -----------------------------
 OUTPUT FORMAT (IMPORTANT)
 
 [
-  {{"input_param1": value, "input_param2": value}},
-  {{"input_param1": value, "input_param2": value}}
+  {{
+    "input": {{"param": value}},
+    "expected_output": value,
+    "description": "description"
+  }},
+  {{
+    "input": {{"param": value}},
+    "expected_output": value,
+    "description": "description"
+  }}
 ]
 
 Only valid JSON. No trailing commas. No comments.

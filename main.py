@@ -49,7 +49,7 @@ def main():
     engine = EvaluationEngine(args.assignment, args.submission)
 
     results = engine.run()
-    print(results)
+    print(engine.generate_report())
 
 
 if __name__ == "__main__":

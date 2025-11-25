@@ -15,6 +15,5 @@ class OllamaClient:
         return llm_name
 
     async def generate(self, prompt: str) -> None:
-        """Send a prompt to the model and return its response."""
         response = await self.llm.ainvoke(prompt)
         print(response)

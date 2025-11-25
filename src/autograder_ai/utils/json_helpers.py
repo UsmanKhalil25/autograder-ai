@@ -2,7 +2,6 @@ import re
 
 
 def sanitize_json(text: str) -> str:
-    """Convert Python syntax to JSON syntax"""
     # Replace Python None with JSON null
     text = re.sub(r'\bNone\b', 'null', text)
     # Replace Python True with JSON true
@@ -15,13 +14,10 @@ def sanitize_json(text: str) -> str:
 
 
 def extract_json(text: str) -> str:
-    """Extract JSON from text, handling markdown code blocks"""
-    # Try to extract JSON from markdown code blocks
     code_block_match = re.search(r'```(?:json)?\s*(\[.*?\])\s*```', text, re.DOTALL)
     if code_block_match:
         return sanitize_json(code_block_match.group(1))
 
-    # Try to find JSON array directly
     json_match = re.search(r'(\[.*\])', text, re.DOTALL)
     if json_match:
         return sanitize_json(json_match.group(1))
